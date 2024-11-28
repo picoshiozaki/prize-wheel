@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プライズホイール</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: transparent;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .button:disabled {
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const PrizeWheel = () => {
+            const [rotation, setRotation] = React.useState(0);
+            const [isSpinning, setIsSpinning] = React.useState(false);
+            const [result, setResult] = React.useState('');
+
+            const prizes = [
+                "当たり！", "もう一回！", "残念…", "特賞！",
+                "当たり！", "チャレンジ賞", "残念…", "当たり！"
+            ];
+
+            const handleSpin = () => {
+                if (!isSpinning) {
+                    setIsSpinning(true);
+                    setResult('');
+                    const extraSpins = 5;
+                    const randomSpinDegrees = Math.random() * 360;
+                    const totalRotation = rotation + (360 * extraSpins) + randomSpinDegrees;
+                    setRotation(totalRotation);
+
+                    setTimeout(() => {
+                        setIsSpinning(false);
+                        const segmentDegrees = 360 / prizes.length;
+                        const normalizedRotation = totalRotation % 360;
+                        const prizeIndex = Math.floor(normalizedRotation / segmentDegrees);
+                        const prize = prizes[prizes.length - 1 - prizeIndex];
+                        setResult(prize);
+                    }, 3000);
+                }
+            };
+
+            return (
+                <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div className="card">
+                            <div style={{ position: 'relative', width: '300px', height: '300px', margin: '0 auto 1.5rem' }}>
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: '50%',
+                                        border: '8px solid #4a90e2',
+                                        background: 'white',
+                                        transform: `rotate(${rotation}deg)`,
+                                        transition: 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 1)'
+                                    }}
+                                >
+                                    {prizes.map((prize, index) => (
+                                        <div
+                                            key={index}
+                                            style={{
+                                                position: 'absolute',
+                                                width: '100%',
+                                                height: '100%',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                transform: `rotate(${(360 / prizes.length) * index}deg)`
+                                            }}
+                                        >
+                                            <span style={{ marginTop: '1rem', fontWeight: 'bold', color: '#333' }}>
+                                                {prize}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-1.5rem',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    fontSize: '2rem',
+                                    color: '#4a90e2'
+                                }}>
+                                    ▼
+                                </div>
+                            </div>
+
+                            <button
+                                className="button"
+                                onClick={handleSpin}
+                                disabled={isSpinning}
+                            >
+                                {isSpinning ? 'まわしています...' : 'まわす！'}
+                            </button>
+
+                            {result && (
+                                <div style={{
+                                    marginTop: '1rem',
+                                    fontSize: '1.5rem',
+                                    fontWeight: 'bold',
+                                    color: '#4a90e2',
+                                    animation: 'bounce 1s'
+                                }}>
+                                    {result}
+                                </div>
+                            )}
+
+                            <div style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
+                                ※1日3回までチャレンジできます
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<PrizeWheel />, document.getElementById('root'));
+    </script>
+</body>
+</html>
